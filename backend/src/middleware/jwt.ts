@@ -5,7 +5,10 @@ const JWT_SECRET = "my_super_secret_key";
 
 export function authenticate(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: "Token required" });
+  if (!authHeader) {
+    res.status(401).json({ error: "Token required" });
+    return;
+  }
 
   const token = authHeader.split(" ")[1];
   try {

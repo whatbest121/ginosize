@@ -1,0 +1,40 @@
+POST http://localhost:3023/auth/signup
+Content-Type: application/json
+
+{
+  "username": "root1",
+  "password": "1234567"
+}
+
+
+### Login
+# @name login
+POST http://localhost:3023/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "secret123"
+}
+
+### เก็บค่า token จาก response ของ login
+@authToken = {{login.response.body.token}}
+
+
+### GET ITEM with Authentication
+GET http://localhost:3023/item/?page=1&limit=10
+Authorization: Bearer {{authToken}}
+
+
+
+### ตัวอย่างการใช้ POST กับ Authentication
+POST http://localhost:3023/item/add
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+"name": "name",
+"price": 333,
+"quantity": 1,
+"image": "ddsd"
+}

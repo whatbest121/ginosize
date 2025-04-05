@@ -16,7 +16,10 @@ const authSchema = z.object({
 // ✅ Signup
 auth.post("/signup", async (req, res) => {
   const parsed = authSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.format() });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.format() })
+    return
+  }
 
   const { username, password } = parsed.data;
 
@@ -30,7 +33,10 @@ auth.post("/signup", async (req, res) => {
 // ✅ Login
 auth.post("/login", async (req, res) => {
   const parsed = authSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.format() });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.format() })
+    return
+  }
 
   const { username, password } = parsed.data;
 
