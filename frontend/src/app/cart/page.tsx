@@ -85,7 +85,6 @@ export default function CartPage() {
     );
 }
 
-// Component แสดงแต่ละรายการในตะกร้า
 function CartRow({
     item,
     updateQuantity,

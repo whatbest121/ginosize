@@ -27,7 +27,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         checkAuth();
 
-        // เพิ่ม event listener เพื่อตรวจสอบการเปลี่ยนแปลงของ localStorage
         window.addEventListener('storage', checkAuth);
         window.addEventListener('focus', checkAuth);
 

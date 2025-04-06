@@ -14,7 +14,6 @@ export function Navbar() {
         return pathname === path ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900";
     };
 
-    // ถ้ายังไม่ได้ล็อกอิน ไม่แสดง Navbar
     if (!isAuthenticated) {
         return null;
     }

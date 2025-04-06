@@ -12,7 +12,6 @@ interface AddToCartButtonProps {
         price: number;
         image?: string;
     };
-    // สามารถเพิ่ม props เพิ่มเติมได้ตามต้องการ
     className?: string;
 }
 
@@ -31,10 +30,8 @@ export function AddToCartButton({ item, className }: AddToCartButtonProps) {
 
         addItem(cartItem);
 
-        // แสดง notification หรือ feedback ว่าเพิ่มสินค้าลงตะกร้าแล้ว
         alert(`Added ${quantity} ${item.name} to cart`);
 
-        // รีเซ็ตจำนวนกลับเป็น 1
         setQuantity(1);
     };
 
