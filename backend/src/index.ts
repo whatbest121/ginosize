@@ -6,6 +6,7 @@ import item from "./router/item";
 import { authenticate } from "./middleware/jwt";
 import { seedItem } from "./seed/seedItem";
 import cors from "cors";
+import { seedRegister } from "./seed/register";
 
 const app = express();
 const PORT = process.env.PORT || 3023;
@@ -32,6 +33,7 @@ app.use("/item", item);
 connectDB().then(async () => {
 
     await seedItem();
+    await seedRegister()
 
     app.listen(PORT, () => {
         console.log(`🚀 Server running at http://localhost:${PORT}`);

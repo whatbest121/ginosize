@@ -1,9 +1,13 @@
-# Jenosize Project
+# Ginosize Project
 
 โปรเจคนี้ประกอบด้วย 3 ส่วนหลัก:
 1. **Frontend**: Next.js application
 2. **Backend**: Node.js API server
 3. **Database**: MongoDB
+
+## โปรเจคนี้ เมื่อรันขึ้นมาจะทำการสร้าง user และ listItem ให้แล้วด้วย seed ตอนรัน backend
+- username: admin0 
+- password: 123456
 
 ## การติดตั้งและรันด้วย Docker
 
