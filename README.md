@@ -8,6 +8,7 @@
 ## โปรเจคนี้ เมื่อรันขึ้นมาจะทำการสร้าง user และ listItem ให้แล้วด้วย seed ตอนรัน backend
 - username: admin0 
 - password: 123456
+- ทำการ list item ทั้งหมด 100 item
 
 ## การติดตั้งและรันด้วย Docker
 
