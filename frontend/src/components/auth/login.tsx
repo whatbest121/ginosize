@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useState } from "react"
 import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +31,7 @@ const FormSchema = z.object({
 export function InputForm() {
     const { login, loginLoading, loginError } = useAuth();
     const [serverError, setServerError] = useState<string | null>(null);
+    const router = useRouter();
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -42,8 +44,15 @@ export function InputForm() {
     function onSubmit(data: z.infer<typeof FormSchema>) {
         setServerError(null);
         try {
-            login(data);
-        } catch (error) {
+            login({
+                ...data,
+                onSuccess: () => {
+                    setTimeout(() => {
+                        router.push('/items');
+                    }, 100);
+                }
+            });
+        } catch {
             setServerError('Login failed. Please try again.');
         }
     }
@@ -53,7 +62,9 @@ export function InputForm() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
                 {loginError && (
                     <div className="bg-red-50 p-4 rounded-md text-red-500 text-sm">
-                        {(loginError as Error).message || 'Authentication failed. Please try again.'}
+                        {loginError instanceof Error
+                            ? loginError.message
+                            : 'Authentication failed. Please try again.'}
                     </div>
                 )}
                 {serverError && (
@@ -99,4 +110,4 @@ export function InputForm() {
             </form>
         </Form>
     )
-}
+} 

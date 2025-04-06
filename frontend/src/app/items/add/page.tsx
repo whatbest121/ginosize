@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useItems } from "@/hooks/useItems";
 import { useRouter } from "next/navigation";
 
@@ -39,6 +39,12 @@ export default function AddItemPage() {
     const [serverError, setServerError] = useState<string | null>(null);
     const router = useRouter();
 
+    useEffect(() => {
+        if (addItemError) {
+            console.error('Add item error:', addItemError);
+        }
+    }, [addItemError]);
+
     const form = useForm<z.infer<typeof ItemFormSchema>>({
         resolver: zodResolver(ItemFormSchema),
         defaultValues: {
@@ -51,10 +57,17 @@ export default function AddItemPage() {
 
     function onSubmit(data: z.infer<typeof ItemFormSchema>) {
         setServerError(null);
+        console.log('Submitting new item:', data);
+
         try {
             addItem(data, {
                 onSuccess: () => {
+                    console.log('Item added successfully');
                     router.push('/items');
+                },
+                onError: (error) => {
+                    console.error('Error adding item:', error);
+                    setServerError(error instanceof Error ? error.message : 'Failed to add item');
                 }
             });
         } catch {
@@ -71,7 +84,9 @@ export default function AddItemPage() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                         {addItemError && (
                             <div className="bg-red-50 p-4 rounded-md text-red-500 text-sm">
-                                {(addItemError as Error).message || 'Failed to add item. Please try again.'}
+                                {addItemError instanceof Error
+                                    ? addItemError.message
+                                    : 'Failed to add item. Please try again.'}
                             </div>
                         )}
                         {serverError && (

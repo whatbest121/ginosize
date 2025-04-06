@@ -12,8 +12,9 @@ export function Navbar() {
         return pathname === path ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900";
     };
 
+    // ถ้ายังไม่ได้ล็อกอิน ไม่แสดง Navbar
     if (!isAuthenticated) {
-        return null; // ไม่แสดง navbar ถ้ายังไม่ได้ล็อกอิน
+        return null;
     }
 
     return (
@@ -25,10 +26,6 @@ export function Navbar() {
                             <span className="text-2xl font-bold text-gray-900">Jenosize</span>
                         </div>
                         <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                            <Link href="/"
-                                className={`inline-flex items-center px-1 pt-1 border-b-2 ${pathname === '/' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
-                                Home
-                            </Link>
                             <Link href="/items"
                                 className={`inline-flex items-center px-1 pt-1 border-b-2 ${pathname === '/items' ? 'border-indigo-500 text-gray-900' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}>
                                 Items
@@ -62,10 +59,6 @@ export function Navbar() {
             {/* เมนูสำหรับหน้าจอมือถือ */}
             <div className="sm:hidden">
                 <div className="pt-2 pb-3 space-y-1">
-                    <Link href="/"
-                        className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive('/')}`}>
-                        Home
-                    </Link>
                     <Link href="/items"
                         className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${isActive('/items')}`}>
                         Items

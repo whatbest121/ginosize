@@ -1,13 +1,14 @@
 'use client';
 
 import { api } from '@/lib/api';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useAuthContext } from '@/lib/auth-provider';
 
 interface LoginCredentials {
     username: string;
     password: string;
+    onSuccess?: () => void;
 }
 
 interface SignupCredentials {
@@ -20,43 +21,76 @@ interface AuthResponse {
     token?: string;
 }
 
+const AUTH_STATUS_KEY = 'authStatus';
+
 export function useAuth() {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-        if (typeof window !== 'undefined') {
-            return !!localStorage.getItem('token');
-        }
-        return false;
-    });
+    const { isAuthenticated, setIsAuthenticated } = useAuthContext();
     const router = useRouter();
+    const queryClient = useQueryClient();
 
     const loginMutation = useMutation({
         mutationFn: async (credentials: LoginCredentials) => {
-            const response = await api.post<AuthResponse>('/auth/login', credentials);
-            return response.data;
-        },
-        onSuccess: (data) => {
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                setIsAuthenticated(true);
-                router.push('/');
+            const { username, password } = credentials;
+            try {
+                const response = await api.post<AuthResponse>('/auth/login', { username, password });
+                return { response: response.data, credentials };
+            } catch (error) {
+                console.error('Login error:', error);
+                throw error;
             }
         },
+        onSuccess: (data) => {
+            const { response, credentials } = data;
+            if (response.token) {
+                localStorage.setItem('token', response.token);
+                setIsAuthenticated(true);
+
+                queryClient.invalidateQueries({ queryKey: [AUTH_STATUS_KEY] });
+
+                if (credentials.onSuccess) {
+                    credentials.onSuccess();
+                } else {
+                    router.push('/items');
+                }
+            } else {
+                console.error('Login successful but no token received');
+            }
+        },
+        onError: (error) => {
+            console.error('Login mutation error:', error);
+        }
     });
 
     const signupMutation = useMutation({
         mutationFn: async (credentials: SignupCredentials) => {
-            const response = await api.post<AuthResponse>('/auth/signup', credentials);
-            return response.data;
+            try {
+                const response = await api.post<AuthResponse>('/auth/signup', credentials);
+                return response.data;
+            } catch (error) {
+                console.error('Signup error:', error);
+                throw error;
+            }
         },
         onSuccess: () => {
             router.push('/login');
         },
+        onError: (error) => {
+            console.error('Signup mutation error:', error);
+        }
     });
 
     const logout = () => {
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-        router.push('/login');
+        try {
+            localStorage.removeItem('token');
+            setIsAuthenticated(false);
+
+            // Invalidate auth status query
+            queryClient.invalidateQueries({ queryKey: [AUTH_STATUS_KEY] });
+
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
     };
 
     return {

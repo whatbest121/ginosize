@@ -1,15 +1,20 @@
 'use client';
 
 import { useItems } from '@/hooks/useItems';
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function ItemsPage() {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const { useGetItems } = useItems();
-    const { data, isLoading, isError } = useGetItems({ page, limit });
+    const { data, isLoading, isError, error } = useGetItems({ page, limit });
+
+    useEffect(() => {
+        if (isError && error) {
+            console.error('Items page error:', error);
+        }
+    }, [isError, error]);
 
     const handlePrevPage = () => {
         if (data?.hasPrevPage) {
@@ -33,11 +38,11 @@ export default function ItemsPage() {
 
     if (isError) {
         return (
-            <div className="flex flex-col items-center justify-center h-screen">
-                <div className="text-xl font-semibold text-red-500 mb-4">Error loading items</div>
-                <Link href="/" className="text-blue-500 hover:underline">
-                    Go back home
-                </Link>
+            <div className="flex flex-col items-center justify-center h-screen p-6">
+                <div className="bg-red-50 p-4 rounded-md text-red-500 mb-4 max-w-lg">
+                    <h2 className="text-xl font-semibold mb-2">Error loading items</h2>
+                    <p className="text-sm">{error instanceof Error ? error.message : 'Unknown error occurred'}</p>
+                </div>
             </div>
         );
     }
@@ -57,7 +62,6 @@ export default function ItemsPage() {
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                 onError={(e) => {
-                                    // Fallback if image fails to load
                                     e.currentTarget.src = 'https://placehold.co/400x300?text=No+Image';
                                 }}
                             />
