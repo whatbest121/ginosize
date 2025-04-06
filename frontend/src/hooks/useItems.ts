@@ -1,3 +1,5 @@
+'use client';
+
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -34,18 +36,35 @@ interface PaginatedResponse {
 interface ItemQueryParams {
     page?: number;
     limit?: number;
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
 }
 
 export function useItems() {
     const queryClient = useQueryClient();
 
-    const useGetItems = (params: ItemQueryParams = { page: 1, limit: 10 }) => {
+    const getItems = async (params: ItemQueryParams = { page: 1, limit: 10 }) => {
+        const { page, limit, sortBy = 'price', sortOrder = 'asc' } = params;
+        try {
+            const response = await api.get<PaginatedResponse>('/item', {
+                params: {
+                    page,
+                    limit,
+                    sortBy,
+                    sortOrder
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching items:', error);
+            throw error;
+        }
+    };
+
+    const useGetItems = (params: ItemQueryParams) => {
         return useQuery({
             queryKey: ['items', params],
-            queryFn: async () => {
-                const response = await api.get<PaginatedResponse>('/item', { params });
-                return response.data;
-            },
+            queryFn: () => getItems(params),
         });
     };
 

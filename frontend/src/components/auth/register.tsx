@@ -6,7 +6,6 @@ import { z } from "zod"
 import { useState } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -19,18 +18,25 @@ import {
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import Link from "next/link"
 
 const FormSchema = z.object({
     username: z.string().min(2, {
         message: "Username must be at least 2 characters.",
     }),
-    password: z.string().min(2, {
-        message: "Password must be at least 2 characters.",
+    password: z.string().min(6, {
+        message: "Password must be at least 6 characters.",
     }),
-})
+    confirmPassword: z.string().min(6, {
+        message: "Confirm password must be at least 6 characters.",
+    }),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+});
 
-export function InputForm() {
-    const { login, loginLoading, loginError } = useAuth();
+export function RegisterForm() {
+    const { register, registerLoading, registerError } = useAuth();
     const [serverError, setServerError] = useState<string | null>(null);
     const router = useRouter();
 
@@ -38,23 +44,27 @@ export function InputForm() {
         resolver: zodResolver(FormSchema),
         defaultValues: {
             username: "",
-            password: ""
+            password: "",
+            confirmPassword: ""
         },
     })
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
         setServerError(null);
+        const { username, password } = data;
+
         try {
-            login({
-                ...data,
+            register({
+                username,
+                password,
                 onSuccess: () => {
                     setTimeout(() => {
-                        router.push('/items');
+                        router.push('/login');
                     }, 100);
                 }
             });
         } catch {
-            setServerError('Login failed. Please try again.');
+            setServerError('Registration failed. Please try again.');
         }
     }
 
@@ -62,17 +72,17 @@ export function InputForm() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
                 <div className="text-center mb-4">
-                    <h2 className="text-2xl font-bold">Login to Your Account</h2>
+                    <h2 className="text-2xl font-bold">Create an Account</h2>
                     <p className="text-sm text-gray-500 mt-1">
-                        Don&apos;t have an account? <Link href="/register" className="text-blue-600 hover:underline">Register</Link>
+                        Already have an account? <Link href="/login" className="text-blue-600 hover:underline">Login</Link>
                     </p>
                 </div>
 
-                {loginError && (
+                {registerError && (
                     <div className="bg-red-50 p-4 rounded-md text-red-500 text-sm">
-                        {loginError instanceof Error
-                            ? loginError.message
-                            : 'Authentication failed. Please try again.'}
+                        {registerError instanceof Error
+                            ? registerError.message
+                            : 'Registration failed. Please try again.'}
                     </div>
                 )}
                 {serverError && (
@@ -90,7 +100,7 @@ export function InputForm() {
                                 <Input placeholder="Enter your username" {...field} />
                             </FormControl>
                             <FormDescription>
-                                Your registered username
+                                Create a unique username
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
@@ -106,14 +116,30 @@ export function InputForm() {
                                 <Input type="password" placeholder="Enter your password" {...field} />
                             </FormControl>
                             <FormDescription>
-                                Your account password
+                                Must be at least 6 characters
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full" disabled={loginLoading}>
-                    {loginLoading ? 'Logging in...' : 'Login'}
+                <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="Confirm your password" {...field} />
+                            </FormControl>
+                            <FormDescription>
+                                Re-enter your password
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="w-full" disabled={registerLoading}>
+                    {registerLoading ? 'Creating Account...' : 'Register'}
                 </Button>
             </form>
         </Form>

@@ -28,6 +28,30 @@ export function useAuth() {
     const router = useRouter();
     const queryClient = useQueryClient();
 
+
+    const registerMutation = useMutation({
+        mutationFn: async (credentials: LoginCredentials) => {
+            const { username, password } = credentials;
+            try {
+                const { data } = await api.post<AuthResponse>('/auth/signup', { username, password });
+                return { response: data, credentials };
+            } catch (error) {
+                console.error('register error:', error);
+                throw error;
+            }
+        },
+        onSuccess: (data) => {
+            if (data) {
+                router.push('/login');
+            } else {
+                console.error('Login successful but no token received');
+            }
+        },
+        onError: (error) => {
+            console.error('Register mutation error:', error);
+        }
+
+    })
     const loginMutation = useMutation({
         mutationFn: async (credentials: LoginCredentials) => {
             const { username, password } = credentials;
@@ -84,7 +108,6 @@ export function useAuth() {
             localStorage.removeItem('token');
             setIsAuthenticated(false);
 
-            // Invalidate auth status query
             queryClient.invalidateQueries({ queryKey: [AUTH_STATUS_KEY] });
 
             router.push('/login');
@@ -95,6 +118,9 @@ export function useAuth() {
 
     return {
         isAuthenticated,
+        register: registerMutation.mutate,
+        registerLoading: registerMutation.isPending,
+        registerError: registerMutation.error,
         login: loginMutation.mutate,
         loginLoading: loginMutation.isPending,
         loginError: loginMutation.error,

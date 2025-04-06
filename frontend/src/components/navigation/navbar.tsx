@@ -3,6 +3,8 @@
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Button } from "../ui/button";
+import { CartIcon } from "@/components/cart/CartIcon";
 
 export function Navbar() {
     const { isAuthenticated, logout } = useAuth();
@@ -36,27 +38,30 @@ export function Navbar() {
                             </Link>
                         </div>
                     </div>
-                    <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                        <button
+                    <div className="hidden sm:flex sm:items-center sm:space-x-4">
+                        <CartIcon />
+                        <Button
                             onClick={logout}
                             className="px-4 py-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
                         >
                             Logout
-                        </button>
+                        </Button>
                     </div>
+
                     <div className="flex items-center sm:hidden">
-                        {/* สำหรับหน้าจอมือถือ */}
-                        <button
-                            onClick={logout}
-                            className="p-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
-                        >
-                            Logout
-                        </button>
+                        <div className="flex items-center space-x-2">
+                            <CartIcon />
+                            <Button
+                                onClick={logout}
+                                className="p-2 text-sm text-white bg-red-500 rounded-md hover:bg-red-600"
+                            >
+                                Logout
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* เมนูสำหรับหน้าจอมือถือ */}
             <div className="sm:hidden">
                 <div className="pt-2 pb-3 space-y-1">
                     <Link href="/items"

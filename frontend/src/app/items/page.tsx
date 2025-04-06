@@ -3,12 +3,17 @@
 import { useItems } from '@/hooks/useItems';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { AddToCartButton } from '@/components/cart/AddToCartButton';
+import { Button } from '@/components/ui/button';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 export default function ItemsPage() {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
+    const [sortBy] = useState('price');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const { useGetItems } = useItems();
-    const { data, isLoading, isError, error } = useGetItems({ page, limit });
+    const { data, isLoading, isError, error } = useGetItems({ page, limit, sortBy, sortOrder });
 
     useEffect(() => {
         if (isError && error) {
@@ -26,6 +31,10 @@ export default function ItemsPage() {
         if (data?.hasNextPage) {
             setPage(page + 1);
         }
+    };
+
+    const toggleSortOrder = () => {
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     };
 
     if (isLoading) {
@@ -49,29 +58,53 @@ export default function ItemsPage() {
 
     return (
         <main className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6">Items</h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold">Items</h1>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-500">Sort by price:</span>
+                    <Button
+                        onClick={toggleSortOrder}
+                        variant="outline"
+                        className="flex items-center gap-1"
+                    >
+                        <span>Price</span>
+                        {sortOrder === 'asc' ? (
+                            <ChevronUp className="h-4 w-4" />
+                        ) : (
+                            <ChevronDown className="h-4 w-4" />
+                        )}
+                    </Button>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {data?.docs.map((item) => (
                     <div key={item._id} className="border rounded-lg overflow-hidden shadow-md">
                         <div className="h-48 bg-gray-200 relative">
                             <Image
-                                src={item.image}
+                                src={item.image || 'https://media.istockphoto.com/id/1324356458/vector/picture-icon-photo-frame-symbol-landscape-sign-photograph-gallery-logo-web-interface-and.jpg?s=612x612&w=0&k=20&c=ZmXO4mSgNDPzDRX-F8OKCfmMqqHpqMV6jiNi00Ye7rE='}
                                 alt={item.name}
                                 className="object-cover"
                                 fill
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                onError={(e) => {
-                                    e.currentTarget.src = 'https://placehold.co/400x300?text=No+Image';
-                                }}
                             />
                         </div>
                         <div className="p-4">
                             <h2 className="text-xl font-semibold">{item.name}</h2>
-                            <div className="flex justify-between mt-2">
-                                <div className="text-green-600 font-medium">${item.price.toFixed(2)}</div>
+                            <div className="flex justify-between mt-2 mb-4">
+                                <div className="text-green-600 font-medium">฿{item.price.toFixed(2)}</div>
                                 <div className="text-gray-600">Qty: {item.quantity}</div>
                             </div>
+
+                            <AddToCartButton
+                                item={{
+                                    id: item._id,
+                                    name: item.name,
+                                    price: item.price,
+                                    image: item.image || 'https://media.istockphoto.com/id/1324356458/vector/picture-icon-photo-frame-symbol-landscape-sign-photograph-gallery-logo-web-interface-and.jpg?s=612x612&w=0&k=20&c=ZmXO4mSgNDPzDRX-F8OKCfmMqqHpqMV6jiNi00Ye7rE='
+                                }}
+                                className="w-full mt-2"
+                            />
                         </div>
                     </div>
                 ))}

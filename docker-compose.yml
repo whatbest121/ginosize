@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: jenosize-backend
+    restart: always
+    ports:
+      - "3023:3023"
+    environment:
+      - PORT=3023
+      - MONGO_URI=mongodb://root:example@mongodb:27017/jenosize?authSource=admin
+      - JWT_SECRET=your_jwt_secret_key
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jenosize-frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3023
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
